@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DmitrySychevDev/job-tracker/internal/config"
+	"github.com/DmitrySychevDev/career-tracker/internal/config"
 )
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {

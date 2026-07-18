@@ -1,4 +1,4 @@
-module github.com/DmitrySychevDev/job-tracker
+module github.com/DmitrySychevDev/career-tracker
 
 go 1.26.4
 
