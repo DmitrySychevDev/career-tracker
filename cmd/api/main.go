@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/DmitrySychevDev/career-tracker/internal/config"
+	"github.com/DmitrySychevDev/career-tracker/internal/database"
 )
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +30,28 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	db, err := database.NewPostgresDB(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sqlDb, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := sqlDb.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	defer func() {
+		if err := sqlDb.Close(); err != nil {
+			log.Printf("failed to close database connection: %v", err)
+		}
+	}()
+
+	log.Println("Connected to database")
 
 	server := &http.Server{
 		Addr:              ":" + cfg.AppPort,
