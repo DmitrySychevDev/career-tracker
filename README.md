@@ -28,13 +28,19 @@ cp .env.example .env
 Copy-Item .env.example .env
 ```
 
+Скачай зависимости приложения:
+
+```bash
+go mod download
+```
+
 Подними PostgreSQL:
 
 ```bash
 docker compose up -d
 ```
 
-Установи migrate CLI с PostgreSQL-драйвером:
+Установи CLI для миграций, если он еще не установлен:
 
 ```bash
 go install -tags postgres github.com/golang-migrate/migrate/v4/cmd/migrate@latest
