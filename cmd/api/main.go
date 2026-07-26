@@ -7,9 +7,10 @@ import (
 	"time"
 
 	"github.com/DmitrySychevDev/career-tracker/internal/config"
+	"github.com/DmitrySychevDev/career-tracker/internal/database"
 )
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
+func healthHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
@@ -25,10 +26,31 @@ func main() {
 	mux.HandleFunc("GET /health", healthHandler)
 
 	cfg, err := config.LoadConfig()
-
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	db, err := database.NewPostgresDB(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sqlDb, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := sqlDb.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	defer func() {
+		if err := sqlDb.Close(); err != nil {
+			log.Printf("failed to close database connection: %v", err)
+		}
+	}()
+
+	log.Println("Connected to database")
 
 	server := &http.Server{
 		Addr:              ":" + cfg.AppPort,
@@ -44,5 +66,4 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
-
 }
