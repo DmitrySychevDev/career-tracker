@@ -8,7 +8,7 @@
 - [x] Docker Compose
 - [x] PostgreSQL
 - [x] Конфигурация через `.env`
-- [ ] Graceful shutdown
+- [x] Graceful shutdown
 - [ ] Structured logging через `slog`
 - [ ] Request ID middleware
 - [ ] Recovery middleware

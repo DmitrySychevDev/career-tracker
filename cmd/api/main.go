@@ -1,69 +1,38 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
-	"net/http"
-	"time"
 
 	"github.com/DmitrySychevDev/career-tracker/internal/config"
 	"github.com/DmitrySychevDev/career-tracker/internal/database"
+	"github.com/DmitrySychevDev/career-tracker/internal/server"
 )
 
-func healthHandler(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"}); err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("GET /health", healthHandler)
-
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err := database.NewPostgresDB(cfg)
+	postgresDb, err := database.NewPostgres(cfg)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	sqlDb, err := db.DB()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := sqlDb.Ping(); err != nil {
 		log.Fatal(err)
 	}
 
 	defer func() {
-		if err := sqlDb.Close(); err != nil {
+		if err := postgresDb.Close(); err != nil {
 			log.Printf("failed to close database connection: %v", err)
 		}
 	}()
 
 	log.Println("Connected to database")
 
-	server := &http.Server{
-		Addr:              ":" + cfg.AppPort,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       60 * time.Second,
-	}
+	srv := server.New(*cfg, postgresDb.SQLDB)
 
-	log.Printf("HTTP server started on %s", server.Addr)
+	log.Printf("starting HTTP server on %s", srv.Addr)
 
-	if err := server.ListenAndServe(); err != nil {
+	if err := server.RunServer(srv); err != nil {
 		log.Fatal(err)
 	}
+
 }
