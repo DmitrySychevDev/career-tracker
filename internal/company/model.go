@@ -16,6 +16,6 @@ type Company struct {
 	CreatedAt        time.Time `gorm:"not null;default:now()" json:"created_at"`
 }
 
-func (Company) TableName() string {
+func (*Company) TableName() string {
 	return "companies"
 }

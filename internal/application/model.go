@@ -19,6 +19,6 @@ type JobApplication struct {
 	CreatedAt       time.Time `gorm:"not null;default:now()" json:"created_at"`
 }
 
-func (JobApplication) TableName() string {
+func (*JobApplication) TableName() string {
 	return "job_applications"
 }

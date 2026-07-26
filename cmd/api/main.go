@@ -10,7 +10,7 @@ import (
 	"github.com/DmitrySychevDev/career-tracker/internal/database"
 )
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
+func healthHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
@@ -26,7 +26,6 @@ func main() {
 	mux.HandleFunc("GET /health", healthHandler)
 
 	cfg, err := config.LoadConfig()
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,5 +66,4 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
-
 }

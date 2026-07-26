@@ -14,6 +14,6 @@ type User struct {
 	CreatedAt    time.Time `gorm:"not null;default:now()" json:"created_at"`
 }
 
-func (User) TableName() string {
+func (*User) TableName() string {
 	return "users"
 }

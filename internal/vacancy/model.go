@@ -21,6 +21,6 @@ type Vacancy struct {
 	CreatedAt   time.Time  `gorm:"not null;default:now()" json:"created_at"`
 }
 
-func (Vacancy) TableName() string {
+func (*Vacancy) TableName() string {
 	return "vacancies"
 }

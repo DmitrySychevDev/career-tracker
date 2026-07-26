@@ -11,6 +11,8 @@ Backend-сервис для трекинга вакансий, компаний 
 - Docker Compose
 - GORM
 - golang-migrate
+- gofumpt
+- golangci-lint
 
 ## Локальный запуск
 
@@ -54,6 +56,38 @@ go run ./cmd/api
 
 ```bash
 curl http://localhost:8080/health
+```
+
+## Code Quality
+
+Установка форматера:
+
+```bash
+go install mvdan.cc/gofumpt@latest
+```
+
+Установка линтера:
+
+```bash
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+```
+
+Форматирование:
+
+```bash
+gofumpt -w .
+```
+
+Линтинг:
+
+```bash
+golangci-lint run ./...
+```
+
+Проверка и автоисправление порядка полей в структурах:
+
+```bash
+golangci-lint run --enable fieldalignment --fix ./...
 ```
 
 ## Миграции
