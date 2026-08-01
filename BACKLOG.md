@@ -10,7 +10,7 @@
 - [x] Конфигурация через `.env`
 - [x] Graceful shutdown
 - [x] Structured logging через `slog`
-- [ ] Request ID middleware
+- [x] Request ID middleware
 - [ ] Recovery middleware
 - [ ] Swagger
 - [ ] GitHub Actions

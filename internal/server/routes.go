@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log/slog"
 	"net/http"
+
+	"github.com/DmitrySychevDev/career-tracker/internal/middleware"
 )
 
 func NewRouter(db *sql.DB, logger *slog.Logger) http.Handler {
@@ -12,5 +14,8 @@ func NewRouter(db *sql.DB, logger *slog.Logger) http.Handler {
 	mux.HandleFunc("GET /health", healthCheck(logger))
 	mux.Handle("GET /ready", readyHandler(db))
 
-	return mux
+	handler := middleware.LoggingMiddleware(logger, mux)
+	handler = middleware.RequestIDMiddleware(handler)
+
+	return handler
 }
