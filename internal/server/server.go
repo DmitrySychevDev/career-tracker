@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 	"os/signal"
 	"syscall"
@@ -13,8 +13,8 @@ import (
 	"github.com/DmitrySychevDev/career-tracker/internal/config"
 )
 
-func New(cfg config.Config, db *sql.DB) *http.Server {
-	mux := NewRouter(db)
+func New(cfg config.Config, db *sql.DB, logger *slog.Logger) *http.Server {
+	mux := NewRouter(db, logger)
 
 	server := &http.Server{
 		Addr:              ":" + cfg.AppPort,
@@ -28,7 +28,7 @@ func New(cfg config.Config, db *sql.DB) *http.Server {
 	return server
 }
 
-func RunServer(srv *http.Server) error {
+func RunServer(srv *http.Server, logger *slog.Logger) error {
 	serverErr := make(chan error, 1)
 
 	go func() {
@@ -50,7 +50,7 @@ func RunServer(srv *http.Server) error {
 	case err := <-serverErr:
 		return err
 	case <-shutdownCtx.Done():
-		log.Println("shutdown signal received")
+		logger.Info("shutdown signal received")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

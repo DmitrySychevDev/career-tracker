@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/DmitrySychevDev/career-tracker/internal/config"
 	"github.com/DmitrySychevDev/career-tracker/internal/database"
@@ -9,30 +10,37 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
 
 	postgresDb, err := database.NewPostgres(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("failed to connect to the db", "error", err)
+		os.Exit(1)
 	}
 
 	defer func() {
 		if err := postgresDb.Close(); err != nil {
-			log.Printf("failed to close database connection: %v", err)
+			logger.Error("failed to close database connection", "error", err)
 		}
 	}()
 
-	log.Println("Connected to database")
+	logger.Info("Connected to database")
 
-	srv := server.New(*cfg, postgresDb.SQLDB)
+	srv := server.New(*cfg, postgresDb.SQLDB, logger)
 
-	log.Printf("starting HTTP server on %s", srv.Addr)
+	logger.Info("starting HTTP server", "addr", srv.Addr)
 
-	if err := server.RunServer(srv); err != nil {
-		log.Fatal(err)
+	if err := server.RunServer(srv, logger); err != nil {
+		logger.Error("unable to start the server", "error", err)
+		os.Exit(1)
 	}
 
 }

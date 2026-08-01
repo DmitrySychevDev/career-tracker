@@ -9,7 +9,7 @@
 - [x] PostgreSQL
 - [x] Конфигурация через `.env`
 - [x] Graceful shutdown
-- [ ] Structured logging через `slog`
+- [x] Structured logging через `slog`
 - [ ] Request ID middleware
 - [ ] Recovery middleware
 - [ ] Swagger
@@ -172,6 +172,6 @@ Offer
 
 - [ ] Dockerfile
 - [ ] Multi-stage build
-- [ ] Healthcheck `/health`
-- [ ] Readiness `/ready`
+- [x] Healthcheck `/health`
+- [x] Readiness `/ready`
 - [ ] Миграции при старте приложения
