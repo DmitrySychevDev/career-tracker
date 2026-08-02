@@ -11,7 +11,7 @@
 - [x] Graceful shutdown
 - [x] Structured logging через `slog`
 - [x] Request ID middleware
-- [ ] Recovery middleware
+- [x] Recovery middleware
 - [ ] Swagger
 - [ ] GitHub Actions
 - [x] golangci-lint

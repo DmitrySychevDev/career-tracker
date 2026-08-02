@@ -15,6 +15,7 @@ func NewRouter(db *sql.DB, logger *slog.Logger) http.Handler {
 	mux.Handle("GET /ready", readyHandler(db))
 
 	handler := middleware.LoggingMiddleware(logger, mux)
+	handler = middleware.RecoveryMiddleware(logger, handler)
 	handler = middleware.RequestIDMiddleware(handler)
 
 	return handler
