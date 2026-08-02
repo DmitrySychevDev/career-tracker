@@ -1,69 +1,46 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
-	"time"
+	"log/slog"
+	"os"
 
 	"github.com/DmitrySychevDev/career-tracker/internal/config"
 	"github.com/DmitrySychevDev/career-tracker/internal/database"
+	"github.com/DmitrySychevDev/career-tracker/internal/server"
 )
 
-func healthHandler(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"}); err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("GET /health", healthHandler)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
 
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
 
-	db, err := database.NewPostgresDB(cfg)
+	postgresDb, err := database.NewPostgres(cfg)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	sqlDb, err := db.DB()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := sqlDb.Ping(); err != nil {
-		log.Fatal(err)
+		logger.Error("failed to connect to the db", "error", err)
+		os.Exit(1)
 	}
 
 	defer func() {
-		if err := sqlDb.Close(); err != nil {
-			log.Printf("failed to close database connection: %v", err)
+		if err := postgresDb.Close(); err != nil {
+			logger.Error("failed to close database connection", "error", err)
 		}
 	}()
 
-	log.Println("Connected to database")
+	logger.Info("Connected to database")
 
-	server := &http.Server{
-		Addr:              ":" + cfg.AppPort,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       60 * time.Second,
+	srv := server.New(*cfg, postgresDb.SQLDB, logger)
+
+	logger.Info("starting HTTP server", "addr", srv.Addr)
+
+	if err := server.RunServer(srv, logger); err != nil {
+		logger.Error("unable to start the server", "error", err)
+		os.Exit(1)
 	}
 
-	log.Printf("HTTP server started on %s", server.Addr)
-
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal(err)
-	}
 }
