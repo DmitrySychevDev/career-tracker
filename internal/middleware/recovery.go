@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/DmitrySychevDev/career-tracker/internal/httpx"
 )
 
 func RecoveryMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
@@ -14,9 +15,7 @@ func RecoveryMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 			err := recover()
 
 			if err != nil {
-				responseWrapper.WriteHeader(http.StatusInternalServerError)
-				responseWrapper.Header().Set("Content-Type", "application/json")
-				_ = json.NewEncoder(responseWrapper).Encode(map[string]string{"message": "internal server error"})
+				_ = httpx.WriteError(responseWrapper, http.StatusInternalServerError, "internal server error")
 
 				requestId := RequestIDFromContext(r.Context())
 				logger.Error("panic recovered.", "error", err, "method", r.Method,

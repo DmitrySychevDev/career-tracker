@@ -3,9 +3,10 @@ package server
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"time"
+
+	"github.com/DmitrySychevDev/career-tracker/internal/httpx"
 )
 
 func readyHandler(db *sql.DB) http.Handler {
@@ -13,15 +14,11 @@ func readyHandler(db *sql.DB) http.Handler {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 
-		w.Header().Set("Content-Type", "application/json")
-
 		if err := db.PingContext(ctx); err != nil {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			_ = json.NewEncoder(w).Encode(map[string]string{"status": "not ready"})
+			_ = httpx.WriteJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "not ready"})
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ready"})
+		_ = httpx.WriteJSON(w, http.StatusOK, map[string]string{"status": "ready"})
 	})
 }
